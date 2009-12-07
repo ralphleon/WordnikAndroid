@@ -4,21 +4,13 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#ffffff"
-    android:padding="10dp"
     >
-    
-<ImageView
-	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:src="@drawable/logo_wordnik"
-	android:paddingBottom="10dp"
-	/>
 	 
 <LinearLayout 
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="10dp"
+    android:padding="6dp"
     >
 
 <EditText
@@ -27,27 +19,22 @@
 	android:layout_height="wrap_content"
 	android:layout_weight="1"
 	android:text="guile"
+	android:maxLines="1"
+	android:singleLine="true"
 	/>
 	
-<Button
+<ImageButton
 	android:id="@+id/goButton"
-    android:layout_width="80dp"
+    android:layout_width="wrap_content"
     android:layout_height="fill_parent"
-    android:text="Go"
+    android:src="@android:drawable/ic_search_category_default"
     />
 </LinearLayout>
-		   
-<ScrollView android:id="@+id/textAreaScroller" 
+		
+<!-- We fill this view @ runtime -->   
+<ScrollView android:id="@+id/scroller" 
     android:layout_width="fill_parent" 
     android:layout_height="fill_parent" 
-> 
-        		    
-<TextView  
-	android:id="@+id/defView"
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="Sample Definition"
-    />
-    
+>     
 </ScrollView>
 </LinearLayout>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/home"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+>
+
+<ImageView
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:src="@drawable/logo_wordnik"
+	android:paddingBottom="10dp"
+	android:layout_marginTop="30dp"/>
+	
+<TextView
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:gravity="center"
+	android:layout_marginTop="5dp"
+	android:text="@string/intro"
+	android:linksClickable="true"
+	android:autoLink="all"
+	/>
+
+<Button
+	android:id="@+id/random"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="35dp"
+	android:text="Random Word"
+	android:layout_gravity="center_horizontal"
+	/>
+
+</LinearLayout>

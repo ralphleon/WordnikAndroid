@@ -2,4 +2,5 @@
 <resources>
     <string name="hello">Hello World, WordnikActivity!</string>
     <string name="app_name">Wordnik</string>
+    <string name="intro"><b>the</b> intro <a href="http://www.google.com">text</a></string>
 </resources>

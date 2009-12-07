@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/scroll"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+>
+	       	
+<TextView
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:background="#999"
+	android:textColor="#fff"
+	android:text="Definition"
+	android:padding="5dp"
+	android:paddingLeft="5dp"
+/>
+	    
+<TextView  
+	android:id="@+id/defView"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:padding="10dp"
+    android:paddingBottom="0px"
+    android:bufferType="spannable"
+    />
+    
+<TextView
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:background="#999"
+	android:textColor="#fff"
+	android:text="Examples"
+	android:padding="5dp"
+	android:paddingLeft="5dp"
+/>
+
+<TextView  
+	android:id="@+id/exampleView"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:padding="10dp"
+    android:bufferType="spannable"
+    android:paddingBottom="0px"
+    />
+      
+</LinearLayout> 

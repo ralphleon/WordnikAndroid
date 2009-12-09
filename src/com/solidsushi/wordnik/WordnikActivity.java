@@ -20,7 +20,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
     
 	private static final String TAG = WordnikActivity.class.getSimpleName();
 	
-	private static final int AOK=0,ERR=1,RANDOM=2;
+	private static final int AOK=0,ERR=1,RANDOM=2,WOD=3;
 	
 	private ProgressDialog progressDialog = null;
 	private TextView mDefinitionView;
@@ -30,7 +30,9 @@ public class WordnikActivity extends Activity implements OnClickListener{
 	private TextView mExampleView;
 	private ScrollView mScroller;
 	private View mMainScreen;
-	private View mFeedScreen;	
+	private View mFeedScreen;
+
+	private TextView mWodText;	
 	
 	/** Called when the activity is first created. */
     @Override
@@ -54,16 +56,24 @@ public class WordnikActivity extends Activity implements OnClickListener{
         LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);	
         mMainScreen = inflater.inflate(R.layout.home, mScroller);
         mFeedScreen = inflater.inflate(R.layout.feed, null);
-        
+            
         View random = mMainScreen.findViewById(R.id.random);
         random.setOnClickListener(this);
+        
         
         mDefinitionView = (TextView)mFeedScreen.findViewById(R.id.defView);
 		mExampleView = (TextView)mFeedScreen.findViewById(R.id.exampleView);
 		
         mHandler = new WordHandler(); 
+        
+        // Load the word of the day
+        mWodText = (TextView)mMainScreen.findViewById(R.id.wodText);
+        
+        Thread wod = new Thread(new WodLoader());
+        wod.start();
+        
     }
-
+    
 	public void onClick(View v) {
 		
 		String word;
@@ -96,6 +106,23 @@ public class WordnikActivity extends Activity implements OnClickListener{
 		}
 	}
 	
+	private class WodLoader implements Runnable{
+		
+		public void run() {
+			
+			Bundle b = new Bundle();
+			Message msg = new Message();
+			msg.setData(b);
+			msg.arg1 = WOD;
+
+			String word = WordnikHelper.buildWordOfTheDay();
+	
+			// Send our word back to the progress dialog
+			b.putString("wod",word);
+			mHandler.sendMessage(msg);
+		}
+		
+	}
 	
 	private class RandomLoader implements Runnable{
 
@@ -105,7 +132,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
 			Message msg = new Message();
 			msg.setData(b);
 			msg.arg1 = RANDOM;
-
+			
 			String word = WordnikHelper.buildRandomWord();
 			
 			// Send our word back to the progress dialog
@@ -113,6 +140,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
 			mHandler.sendMessage(msg);
 		}
 	}
+	
 	
 	/** 
 	 * Uses wordnikhelper to access the web content, then sends a message 
@@ -166,16 +194,22 @@ public class WordnikActivity extends Activity implements OnClickListener{
 	{		
     	@Override
 		public void handleMessage(Message msg)
-    	{
-    		if(mScroller.getChildAt(0) != mFeedScreen){
-    			mScroller.removeAllViews();
-    			mScroller.addView(mFeedScreen, 0);
-    		}
-    		
+    	{	
     		Bundle b = msg.getData();
     			
     		switch(msg.arg1){
-    		   		
+    		
+    		case AOK:
+    		case ERR:
+    		case RANDOM:
+    			if(mScroller.getChildAt(0) != mFeedScreen){
+        			mScroller.removeAllViews();
+        			mScroller.addView(mFeedScreen, 0);
+        		}
+    		}
+    		
+    		switch(msg.arg1){
+    		   			
     		case AOK:  			
     			mDefinitionView.setText(Html.fromHtml(
     					b.getString("def")),
@@ -190,12 +224,16 @@ public class WordnikActivity extends Activity implements OnClickListener{
     			mDefinitionView.setText("Word not found!");
     			break;
     			
-    		case RANDOM:
-    			
+    		case RANDOM:   			
     			mWordEdit.setText(b.getString("word"));
     			View v = findViewById(R.id.goButton);
     			progressDialog.dismiss();
     			v.performClick();
+    			break;
+
+    		case WOD:
+    			String wod = "<b>Word of the day:</b><br/>" + b.getString("wod");
+    			mWodText.setText(Html.fromHtml(wod));
     			break;
     		}
     		

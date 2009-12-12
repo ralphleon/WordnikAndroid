@@ -102,7 +102,7 @@ class WordnikHelper{
         		// Find the instances of our word, and then bold it
         		display = boldWord(display,word);
         		
-        		builder += "<p>" + i+1 + ". " + display + " - <i>" + title + "</i></p>";
+        		builder += "<p>" + (i+1) + ". " + display + " - <i>" + title + "</i></p>";
         	
         	}
 		} catch (Exception e) {
@@ -169,13 +169,6 @@ class WordnikHelper{
     		String display = o.optString("text");
     		r += display;
     		
-        	/*for(int i=0;i<objArray.length();i++){	
-        		JSONObject o = objArray.getJSONObject(i);
-        		
-        		String display = o.optString("text");
-        		r += display + ",";
-        	}*/      	
-        	
 		} catch (Exception e) {
 			Log.e(TAG,"Error" + e);
 		}

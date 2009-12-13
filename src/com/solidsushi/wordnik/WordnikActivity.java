@@ -9,6 +9,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -80,8 +83,23 @@ public class WordnikActivity extends Activity implements OnClickListener{
         
         Thread wod = new Thread(new WodLoader());
         wod.start();    
-        
-        hideSoftKeyboard();
+    }
+   
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case R.id.random:
+    		loadRandomWord();
+    		return true;
+     
+      default:
+        return super.onContextItemSelected(item);
+      }
     }
     
     private void hideSoftKeyboard()
@@ -124,16 +142,19 @@ public class WordnikActivity extends Activity implements OnClickListener{
 				break;
 				
 			case R.id.random:
-				mProgressScreen.setProgressText("Finding a random word...");			
-				setScrollView(mProgressScreen.getView());
-				
-				thread = new Thread(new RandomLoader());
-			    thread.start();
+				loadRandomWord();
 				break;
 			}
 		}
 	}
 	
+	private void loadRandomWord(){
+		mProgressScreen.setProgressText("Finding a random word...");			
+		setScrollView(mProgressScreen.getView());
+		
+		Thread thread = new Thread(new RandomLoader());
+	    thread.start();
+	}
 	
 	/**
 	 * Runnable that loads the word of the day

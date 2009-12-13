@@ -9,7 +9,7 @@
 <TextView
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:background="#999"
+	android:background="@drawable/settings_header_raw"
 	android:textColor="#fff"
 	android:text="Definition"
 	android:padding="5dp"
@@ -28,7 +28,7 @@
 <TextView
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:background="#999"
+	android:background="@drawable/settings_header_raw"
 	android:textColor="#fff"
 	android:text="Examples"
 	android:padding="5dp"

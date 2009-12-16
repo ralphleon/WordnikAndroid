@@ -1,6 +1,8 @@
 package com.solidsushi.wordnik;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -28,6 +30,8 @@ public class WordnikActivity extends Activity implements OnClickListener{
 	
 	/** Error Codes */
 	private static final int NOT_FOUND=0,NO_INTERNET=1;
+
+	private static final int DIALOG_ABOUT = 0;
 	
 	private TextView mDefinitionView;
 	private EditText mWordEdit;
@@ -42,6 +46,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
 	
 	private TextView mWodText;	
 	private TextView mErrText;
+
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -70,8 +75,8 @@ public class WordnikActivity extends Activity implements OnClickListener{
         
         mProgressScreen = new ProgressView(this);
         
-        View random = mMainScreen.findViewById(R.id.random);
-        random.setOnClickListener(this);
+        //View random = mMainScreen.findViewById(R.id.random);
+        //random.setOnClickListener(this);
         
         mDefinitionView = (TextView)mFeedScreen.findViewById(R.id.defView);
 		mExampleView = (TextView)mFeedScreen.findViewById(R.id.exampleView);
@@ -80,7 +85,6 @@ public class WordnikActivity extends Activity implements OnClickListener{
         
         // Load the word of the day
         mWodText = (TextView)mMainScreen.findViewById(R.id.wodText);
-        
         Thread wod = new Thread(new WodLoader());
         wod.start();    
     }
@@ -96,10 +100,32 @@ public class WordnikActivity extends Activity implements OnClickListener{
     	case R.id.random:
     		loadRandomWord();
     		return true;
-     
+    	case R.id.about:
+    		showDialog(DIALOG_ABOUT);
+    		return true;
       default:
         return super.onContextItemSelected(item);
       }
+    }
+    
+    protected Dialog onCreateDialog(int id) {
+        Dialog dialog;
+        switch(id) {
+        case DIALOG_ABOUT:
+            // do the work to define the pause Dialog
+        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        	
+        	builder.setMessage(R.string.about)
+        	       .setCancelable(false)
+        		   .setNeutralButton("Ok",null);
+        	
+        	dialog = builder.create();
+        	
+            break;
+        default:
+            dialog = null;
+        }
+        return dialog;
     }
     
     private void hideSoftKeyboard()
@@ -250,13 +276,14 @@ public class WordnikActivity extends Activity implements OnClickListener{
 		public void handleMessage(Message msg)
     	{	
     		Bundle b = msg.getData();
-    		hideSoftKeyboard();
+    		
     		switch(msg.arg1){
     		
     		case AOK:
     		case ERR:
     		case RANDOM:
     			setScrollView(mFeedScreen);
+    			hideSoftKeyboard();
     		}
     		
     		switch(msg.arg1){

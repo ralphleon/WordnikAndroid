@@ -62,11 +62,7 @@ class WordnikHelper{
         		JSONObject o = obj.getJSONObject(i);
         		
         		String pos = o.optString("partOfSpeech");
-        		builder += "<p>" + i+1 + ". <b>" + pos + "</b> " + o.getString("defTxtSummary") + "</p>";
-        		
-        		//builder.append(summary);
-        		//builder.setSpan(new UnderlineSpan(), 0,10, 0);
-        		
+        		builder += "<p>" + (i+1) + ". <b>" + pos + "</b> " + o.getString("defTxtSummary") + "</p>";
         	}
 		} catch (Exception e) {
 
@@ -117,7 +113,7 @@ class WordnikHelper{
 	{
 		String response = null;  
 		try {  
-               URL updateURL = new URL("http://api.wordnik.com/api/words.json/randomWord");          
+               URL updateURL = new URL("http://api.wordnik.com/api/words.json/randomWord?hasDictionaryDef=true");          
                response = getResponse(updateURL);
                
 		} catch (Exception e) {  

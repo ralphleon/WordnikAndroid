@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/home"
 	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:orientation="vertical"
+	android:layout_height="fill_parent"
 >
-
+	
 <ImageView
+	android:id="@+id/wordnikImage"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:src="@drawable/logo_wordnik"
@@ -15,23 +15,38 @@
 	
 <TextView
 	android:id="@+id/wodText"
+	android:layout_below="@id/wordnikImage"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:gravity="center"
-	android:layout_marginTop="5dp"
+	android:layout_marginTop="10dp"
 	android:text="@string/intro"
 	android:linksClickable="true"
 	android:autoLink="all"
 	android:padding="15dp"
+	android:textSize="18sp"
 	/>
+	
+<!-- <TextView
+	android:id="@+id/about"
+	android:layout_below="@id/wodText"
+	android:textSize="10sp"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:gravity="bottom"
+	android:text="@string/about"
+	android:layout_marginTop="40dp"
+	/>
+-->
 
-<Button
+<!-- <Button
 	android:id="@+id/random"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
 	android:layout_marginTop="35dp"
 	android:text="Random Word"
 	android:layout_gravity="center_horizontal"
-	/>
+	/>-->
 
-</LinearLayout>
+
+</RelativeLayout>

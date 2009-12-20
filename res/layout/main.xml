@@ -22,10 +22,12 @@
 	android:text=""
 	android:maxLines="1"
 	android:singleLine="true"
+	android:hint="@string/hint"
 	/>
 	
 <ImageButton
 	android:id="@+id/goButton"
+	android:onClick="onClick"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
     android:src="@android:drawable/ic_search_category_default"

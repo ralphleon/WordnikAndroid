@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Wordnik</string>
-    <string name="intro"><i>Loading word of the day...</i></string>
-    <string name="about">Content provided by <a href="http://www.wordnik.com/">wordnik.com</a>. Developed by Ralph Gootee.</string>
+    <string name="wod">Word of the Day</string>
+    <string name="info">Wordnik wants to be a place for all the words, and everything known about them.</string>
+    <string name="intro"><i>Loading...</i></string>
+    <string name="hint">Enter a word</string>
+    <string name="about">
+     Content provided by <a href="http://www.wordnik.com/">wordnik.com</a>. Developed by Ralph Gootee.
+     Icon by Tael, from wikimedia.
+    </string>
+	
+
 </resources>

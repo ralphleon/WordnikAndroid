@@ -7,25 +7,62 @@
 	
 <ImageView
 	android:id="@+id/wordnikImage"
+	android:maxWidth="250dp"
+	android:maxHeight="70dp"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:src="@drawable/logo_wordnik"
-	android:paddingBottom="10dp"
-	android:layout_marginTop="30dp"/>
-	
+	android:src="@drawable/wordnik_logo"
+	android:adjustViewBounds="true"
+	android:paddingTop="15dp"
+	android:paddingLeft="30dp"
+	android:paddingRight="30dp"
+	android:paddingBottom="5dp"/>
+
 <TextView
-	android:id="@+id/wodText"
+	android:id="@+id/info"
+	android:textColor="#555555"
 	android:layout_below="@id/wordnikImage"
+	android:textSize="12sp"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:gravity="center"
+	android:text="@string/info"
+	android:layout_marginTop="3dp"
+	/>
+	
+	<LinearLayout
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"	
+	android:layout_marginLeft="10dp"
+	android:layout_marginRight="10dp"
+	android:layout_marginTop="25dp"
+	android:layout_below="@id/info"
+	android:padding="10dp"
+	android:background="@drawable/wod_background"
+
+	>
+	<TextView
+	android:id="@+id/wodText"
+	android:onClick="onClick"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:gravity="center"
-	android:layout_marginTop="10dp"
 	android:text="@string/intro"
 	android:linksClickable="true"
 	android:autoLink="all"
-	android:padding="15dp"
 	android:textSize="18sp"
 	/>
+	
+	<TextView
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:text="@string/wod"
+	android:textSize="11sp"
+	android:gravity="right"
+	android:textColor="#AAAAAA"
+	/>
+		
+	</LinearLayout>
 	
 <!-- <TextView
 	android:id="@+id/about"

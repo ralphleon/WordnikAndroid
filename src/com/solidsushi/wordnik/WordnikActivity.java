@@ -10,19 +10,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-public class WordnikActivity extends Activity implements OnClickListener{
+public class WordnikActivity extends Activity{
     
 	private static final String TAG = WordnikActivity.class.getSimpleName();
 	
@@ -59,10 +60,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
         setContentView(R.layout.main);
          
 		mWordEdit = (EditText)(findViewById(R.id.wordEdit));
-		
-		View v = findViewById(R.id.goButton);
-        v.setOnClickListener(this);
-        
+        mWordEdit.setOnEditorActionListener(new ActionListener());
         mScroller = (ScrollView)findViewById(R.id.scroller);
         
         // Inflate the main screen view
@@ -75,9 +73,6 @@ public class WordnikActivity extends Activity implements OnClickListener{
         
         mProgressScreen = new ProgressView(this);
         
-        //View random = mMainScreen.findViewById(R.id.random);
-        //random.setOnClickListener(this);
-        
         mDefinitionView = (TextView)mFeedScreen.findViewById(R.id.defView);
 		mExampleView = (TextView)mFeedScreen.findViewById(R.id.exampleView);
 		  
@@ -88,7 +83,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
         Thread wod = new Thread(new WodLoader());
         wod.start();    
     }
-   
+    
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
@@ -161,6 +156,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
 				mProgressScreen.setProgressText("Looking up " + word + "...");
 				
 				setScrollView(mProgressScreen.getView());
+				mProgressScreen.reAnimate();
 				
 				thread = new Thread(new Loader(word));
 			    thread.start();
@@ -170,6 +166,10 @@ public class WordnikActivity extends Activity implements OnClickListener{
 			case R.id.random:
 				loadRandomWord();
 				break;
+				
+			case R.id.wodText:
+				mWordEdit.setText("word of the day!");
+				break;				
 			}
 		}
 	}
@@ -177,9 +177,30 @@ public class WordnikActivity extends Activity implements OnClickListener{
 	private void loadRandomWord(){
 		mProgressScreen.setProgressText("Finding a random word...");			
 		setScrollView(mProgressScreen.getView());
+		mProgressScreen.reAnimate();
 		
 		Thread thread = new Thread(new RandomLoader());
 	    thread.start();
+	}
+	
+	/** Listener for the key presses */
+	private class ActionListener implements TextView.OnEditorActionListener {
+
+		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+		
+			if(v.getText().equals("")){
+				return false;
+			}
+			else if(actionId == EditorInfo.IME_ACTION_DONE || 
+				actionId == EditorInfo.IME_ACTION_NEXT ||
+				event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+			{
+				findViewById(R.id.goButton).performClick();
+				return true;
+			}
+			
+			return false;
+		}		
 	}
 	
 	/**
@@ -318,7 +339,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
     			break;
 
     		case WOD:
-    			String wod = "<b>Word of the day:</b><br/>" + b.getString("wod");
+    			String wod = b.getString("wod");
     			mWodText.setText(Html.fromHtml(wod));
     			break;
     		}
@@ -326,7 +347,6 @@ public class WordnikActivity extends Activity implements OnClickListener{
     	}
 	}
 
-	
 	/* 		
 	 *@return boolean return true if the application can access the internet 
 	 */  
@@ -340,5 +360,7 @@ public class WordnikActivity extends Activity implements OnClickListener{
 			return true;  
 		}  
 		return true;  
+		
 	}  	
+	
 }

@@ -20,10 +20,20 @@ class ProgressView
 		mProgress = (ProgressBar)mProgressView.findViewById(R.id.progressBar);
 	}
 	
-	View getView(){ return mProgressView; }
+	View getView(){ 
+		return mProgressView; 
+		}
 	
 	public void setProgressText(String s){
 		mText.setText(s);
+	}
+	
+	public void reAnimate()
+	{
+		mProgress.setVisibility(View.GONE);
+		mProgress.setVisibility(View.VISIBLE);
+		mProgress.setIndeterminate(false);
+		mProgress.setIndeterminate(true);		
 	}
 	
 }

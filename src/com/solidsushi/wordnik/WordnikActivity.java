@@ -25,18 +25,21 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+
 public class WordnikActivity extends Activity{
     
 	/**
 	 * Simple wrapper class for word data
 	 */
 	public class WordData{
+		String word;
 		Spanned definitions;
 		Spanned examples;
 	}
 	
 	private static final String TAG = WordnikActivity.class.getSimpleName();
 	
+	/* States, also handler ids */
 	private static final int AOK=0,ERR=1,RANDOM=2,WOD=3;
 	
 	/** Error Codes */
@@ -58,6 +61,7 @@ public class WordnikActivity extends Activity{
 	private TextView mWodText;	
 	private TextView mErrText;
 
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -88,29 +92,68 @@ public class WordnikActivity extends Activity{
         mHandler = new WordHandler(); 
         
         // Let's see if we're already loaded
-        WordData loaded = (WordData)getLastNonConfigurationInstance();
+        Object [] loaded = (Object[])getLastNonConfigurationInstance();
+        loadState(loaded);
+    }
+    
+    /**
+     * Loads the state from a pervious instance
+     * @param loaded the object obtained from NonconfigurationInstance
+     */
+    private void loadState(Object [] loaded) {
+    	
+    	boolean failed = true;
+    	
+        if(	loaded != null){
+    	
+        	int mode = (Integer)loaded[0];
+        	int err = (Integer)loaded[1];
+        	WordData data = (WordData)loaded[2];
         
-        if(	loaded != null && loaded.definitions != null 
-        	&& !(loaded.definitions.equals("") && loaded.examples.equals("")))
-        {	
- 			setScrollView(mFeedScreen);
-        	loadWordData(loaded);	
+        	switch(mode){
+        	
+        	case AOK:
+        		if(data !=null & data.definitions != null && data.examples != null
+        			&& !(data.definitions.length() == 0 && data.examples.length() == 0))
+        		{
+        			setScrollView(mFeedScreen);
+        			loadWordData(data);
+        			failed = false;
+        		}
+        		break;
+        		
+        	case ERR:
+        		if(data !=null & data.word != null && data.word.length() > 0)
+        		{
+        			mWordEdit.setText(data.word);
+        		}
+        			
+        		loadErrorScreen(err);
+        		failed = false;
+        		break;
+        	}
         }
-        else{
+        	       	
+        if(failed){
          	// Load the word of the day
         	mWodText = (TextView)mMainScreen.findViewById(R.id.wodText);
         	Thread wod = new Thread(new WodLoader());
         	wod.start(); 
         }
-    }
-    
-    public boolean onCreateOptionsMenu(Menu menu) {
+		
+	}
+
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
+	
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+    	
     	switch (item.getItemId()) {
     	case R.id.random:
     		loadRandomWord();
@@ -118,13 +161,15 @@ public class WordnikActivity extends Activity{
     	case R.id.about:
     		showDialog(DIALOG_ABOUT);
     		return true;
-      default:
-        return super.onContextItemSelected(item);
-      }
+    	default:
+    		return super.onContextItemSelected(item);
+    	}
     }
     
+    @Override
     protected Dialog onCreateDialog(int id) {
-        Dialog dialog;
+        
+    	Dialog dialog;
         switch(id) {
         case DIALOG_ABOUT:
             // do the work to define the pause Dialog
@@ -143,10 +188,25 @@ public class WordnikActivity extends Activity{
         return dialog;
     }
     
+    
     @Override
     public Object onRetainNonConfigurationInstance() {
-    	return getWordData();
+    	
+    	int mode = 0,err = 0;
+    	
+    	View v = mContent.getChildAt(0);
+    	
+    	if(v == mErrorScreen){
+    		mode = ERR;
+    		err = (Integer)mErrorScreen.getTag();	
+    	}else if(v == mFeedScreen){
+    		mode = AOK;
+    	}
+    	
+    	Object [] array = { mode, err, getWordData()};	
+    	return array;
     }
+    
     
     private void hideSoftKeyboard()
     {
@@ -158,32 +218,21 @@ public class WordnikActivity extends Activity{
      * Removes the old scrolled view and adds a new one
      * @param View to remove.
      */
-    public void setScrollView(View v){
+    private void setScrollView(View v){
 		if(mContent.getChildAt(0) != v){
 			mContent.removeAllViews();
 			mContent.addView(v, 0);
 		}
     }
     
-    public void loadWord()
-    {
-    	String word = mWordEdit.getText().toString();		
-    	
-		Thread thread;
-		mProgressScreen.setProgressText("Looking up " + word + "...");
-		
-		setScrollView(mProgressScreen.getView());
-		mProgressScreen.reAnimate();
-		
-		thread = new Thread(new Loader(word));
-	    thread.start();
-    }
     
+    /**
+     * Click listener callback
+     */
 	public void onClick(View v) {
 		
 		if(!haveInternet()){	
-			mErrText.setText("No internet connection!");
-			setScrollView(mErrorScreen);
+			loadErrorScreen(NO_INTERNET);
 		}else{		
 			switch(v.getId()){
 			
@@ -201,15 +250,53 @@ public class WordnikActivity extends Activity{
 			}
 		}
 	}
+    
 	
-	private void loadRandomWord(){
-		mProgressScreen.setProgressText("Finding a random word...");			
+    /** 
+     * Loads the word given in the word edit
+     */
+    private void loadWord(){
+    	
+    	String word = mWordEdit.getText().toString();		
+    	
+		Thread thread;
+		mProgressScreen.setProgressText("Looking up " + word + "...");
+		
 		setScrollView(mProgressScreen.getView());
+		mProgressScreen.reAnimate();
+		
+		thread = new Thread(new Loader(word));
+	    thread.start();
+    }
+	
+    
+    /**
+     * Finds a random word
+     */
+	private void loadRandomWord(){
+		
+		setScrollView(mProgressScreen.getView());
+		mProgressScreen.setProgressText("Finding a random word...");			
 		mProgressScreen.reAnimate();
 		
 		Thread thread = new Thread(new RandomLoader());
 	    thread.start();
 	}
+
+	private void loadErrorScreen(int error) {
+		
+		setScrollView(mErrorScreen);   	
+		mErrorScreen.setTag(error);
+		
+		switch(error){
+		case NOT_FOUND:
+			mErrText.setText(mWordEdit.getText().toString() + " not found!");
+			break;
+		case NO_INTERNET:
+			mErrText.setText("No data connection!");
+		}
+	}
+	
 	
 	/** Listener for the key presses */
 	private class ActionListener implements TextView.OnEditorActionListener {
@@ -231,6 +318,7 @@ public class WordnikActivity extends Activity{
 		}		
 	}
 	
+	
 	/**
 	 * Runnable that loads the word of the day
 	 */
@@ -251,6 +339,7 @@ public class WordnikActivity extends Activity{
 		}
 		
 	}
+	
 	
 	/**
 	 * Runnable that loads a random word
@@ -334,20 +423,11 @@ public class WordnikActivity extends Activity{
     			data.definitions = Html.fromHtml(b.getString("def"));
     			data.examples =  Html.fromHtml(b.getString("example"));
     			
-    			loadWordData(data);
-    			
+    			loadWordData(data);			
     			break;
     		
     		case ERR:  			
-    			setScrollView(mErrorScreen);
-    			
-    			switch(msg.arg2){
-    			case NOT_FOUND:
-    				mErrText.setText(mWordEdit.getText().toString() + " not found!");
-    				break;
-    			case NO_INTERNET:
-    				mErrText.setText("No data connection!");
-    			}
+    			loadErrorScreen(msg.arg2);
     			break;
     				
     		case RANDOM:
@@ -359,11 +439,13 @@ public class WordnikActivity extends Activity{
     			String wod = b.getString("wod");
     			mWodText.setText(Html.fromHtml(wod));
     			break;
-    		}
-    		
+    		}		
     	}
-	}
 
+		
+	}
+	
+	
 	/** 
 	 * Loads the word data structure into the appropriate views
 	 * @param data structure containing definition, example usage, etc
@@ -380,12 +462,14 @@ public class WordnikActivity extends Activity{
 				TextView.BufferType.SPANNABLE);
 	}
 	
-	private WordData getWordData()
-	{
+	
+	private WordData getWordData(){
+		
 		WordData data = new WordData();
 		
-		data.definitions=  (Spannable)mDefinitionView.getText();
-		data.examples= (Spannable)mExampleView.getText();
+		data.word = mWordEdit.getText().toString();
+		data.definitions=  (Spannable) mDefinitionView.getText();
+		data.examples= (Spannable) mExampleView.getText();
 		
 		return data;
 	}

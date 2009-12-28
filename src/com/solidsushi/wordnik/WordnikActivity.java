@@ -10,21 +10,31 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.Spanned;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class WordnikActivity extends Activity{
     
+	/**
+	 * Simple wrapper class for word data
+	 */
+	public class WordData{
+		Spanned definitions;
+		Spanned examples;
+	}
+	
 	private static final String TAG = WordnikActivity.class.getSimpleName();
 	
 	private static final int AOK=0,ERR=1,RANDOM=2,WOD=3;
@@ -39,7 +49,7 @@ public class WordnikActivity extends Activity{
 	private WordHandler mHandler;
 
 	private TextView mExampleView;
-	private ScrollView mScroller;
+	private ViewGroup mContent;
 	private View mMainScreen;
 	private View mFeedScreen;
 	private ProgressView mProgressScreen;
@@ -54,18 +64,17 @@ public class WordnikActivity extends Activity{
     {
         super.onCreate(savedInstanceState);
         
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-    	
+        requestWindowFeature(Window.FEATURE_NO_TITLE);  	
         setTheme(android.R.style.Theme_Light_NoTitleBar);
         setContentView(R.layout.main);
          
 		mWordEdit = (EditText)(findViewById(R.id.wordEdit));
         mWordEdit.setOnEditorActionListener(new ActionListener());
-        mScroller = (ScrollView)findViewById(R.id.scroller);
+        mContent = (ViewGroup)findViewById(R.id.content);
         
         // Inflate the main screen view
         LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);	
-        mMainScreen = inflater.inflate(R.layout.home, mScroller);
+        mMainScreen = inflater.inflate(R.layout.home, mContent);
         mFeedScreen = inflater.inflate(R.layout.feed, null);
         mErrorScreen = inflater.inflate(R.layout.error, null);
 
@@ -78,10 +87,21 @@ public class WordnikActivity extends Activity{
 		  
         mHandler = new WordHandler(); 
         
-        // Load the word of the day
-        mWodText = (TextView)mMainScreen.findViewById(R.id.wodText);
-        Thread wod = new Thread(new WodLoader());
-        wod.start();    
+        // Let's see if we're already loaded
+        WordData loaded = (WordData)getLastNonConfigurationInstance();
+        
+        if(	loaded != null && loaded.definitions != null 
+        	&& !(loaded.definitions.equals("") && loaded.examples.equals("")))
+        {	
+ 			setScrollView(mFeedScreen);
+        	loadWordData(loaded);	
+        }
+        else{
+         	// Load the word of the day
+        	mWodText = (TextView)mMainScreen.findViewById(R.id.wodText);
+        	Thread wod = new Thread(new WodLoader());
+        	wod.start(); 
+        }
     }
     
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -123,6 +143,11 @@ public class WordnikActivity extends Activity{
         return dialog;
     }
     
+    @Override
+    public Object onRetainNonConfigurationInstance() {
+    	return getWordData();
+    }
+    
     private void hideSoftKeyboard()
     {
     	InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -134,16 +159,27 @@ public class WordnikActivity extends Activity{
      * @param View to remove.
      */
     public void setScrollView(View v){
-		if(mScroller.getChildAt(0) != v){
-			mScroller.removeAllViews();
-			mScroller.addView(v, 0);
+		if(mContent.getChildAt(0) != v){
+			mContent.removeAllViews();
+			mContent.addView(v, 0);
 		}
     }
     
-	public void onClick(View v) {
-		
-		String word;
+    public void loadWord()
+    {
+    	String word = mWordEdit.getText().toString();		
+    	
 		Thread thread;
+		mProgressScreen.setProgressText("Looking up " + word + "...");
+		
+		setScrollView(mProgressScreen.getView());
+		mProgressScreen.reAnimate();
+		
+		thread = new Thread(new Loader(word));
+	    thread.start();
+    }
+    
+	public void onClick(View v) {
 		
 		if(!haveInternet()){	
 			mErrText.setText("No internet connection!");
@@ -152,15 +188,7 @@ public class WordnikActivity extends Activity{
 			switch(v.getId()){
 			
 			case R.id.goButton:		
-				word = mWordEdit.getText().toString();		
-				mProgressScreen.setProgressText("Looking up " + word + "...");
-				
-				setScrollView(mProgressScreen.getView());
-				mProgressScreen.reAnimate();
-				
-				thread = new Thread(new Loader(word));
-			    thread.start();
-				
+				loadWord();				
 				break;
 				
 			case R.id.random:
@@ -195,7 +223,7 @@ public class WordnikActivity extends Activity{
 				actionId == EditorInfo.IME_ACTION_NEXT ||
 				event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 			{
-				findViewById(R.id.goButton).performClick();
+				loadWord();
 				return true;
 			}
 			
@@ -260,10 +288,7 @@ public class WordnikActivity extends Activity{
 		public void run() {
 			Message msg = new Message();
 			
-			
-			String word = mWord;
-			
-			
+			String word = mWord;		
 			boolean found = WordnikHelper.wordExists(word);
 			
 			if(found){	
@@ -297,30 +322,23 @@ public class WordnikActivity extends Activity{
 		public void handleMessage(Message msg)
     	{	
     		Bundle b = msg.getData();
-    		
-    		switch(msg.arg1){
-    		
-    		case AOK:
-    		case ERR:
-    		case RANDOM:
-    			setScrollView(mFeedScreen);
-    			hideSoftKeyboard();
-    		}
+    		hideSoftKeyboard();
     		
     		switch(msg.arg1){
     		   			
-    		case AOK:  			
-    			mDefinitionView.setText(Html.fromHtml(
-    					b.getString("def")),
-    					TextView.BufferType.SPANNABLE);
+    		case AOK:  
+     			setScrollView(mFeedScreen);
+     			
+    			WordData data = new WordData();
     			
-    			mExampleView.setText(Html.fromHtml(
-    					b.getString("example")),
-    					TextView.BufferType.SPANNABLE);
+    			data.definitions = Html.fromHtml(b.getString("def"));
+    			data.examples =  Html.fromHtml(b.getString("example"));
+    			
+    			loadWordData(data);
+    			
     			break;
     		
-    		case ERR:
-    			
+    		case ERR:  			
     			setScrollView(mErrorScreen);
     			
     			switch(msg.arg2){
@@ -332,10 +350,9 @@ public class WordnikActivity extends Activity{
     			}
     			break;
     				
-    		case RANDOM:   			
+    		case RANDOM:
     			mWordEdit.setText(b.getString("word"));
-    			View v = findViewById(R.id.goButton);
-    			v.performClick();
+    			loadWord();
     			break;
 
     		case WOD:
@@ -347,6 +364,33 @@ public class WordnikActivity extends Activity{
     	}
 	}
 
+	/** 
+	 * Loads the word data structure into the appropriate views
+	 * @param data structure containing definition, example usage, etc
+	 */
+	private void loadWordData(WordData data) {
+		// TODO Auto-generated method stub
+
+		mDefinitionView.setText(
+				data.definitions,
+				TextView.BufferType.SPANNABLE);
+		
+		mExampleView.setText(
+				data.examples,
+				TextView.BufferType.SPANNABLE);
+	}
+	
+	private WordData getWordData()
+	{
+		WordData data = new WordData();
+		
+		data.definitions=  (Spannable)mDefinitionView.getText();
+		data.examples= (Spannable)mExampleView.getText();
+		
+		return data;
+	}
+	
+	
 	/* 		
 	 *@return boolean return true if the application can access the internet 
 	 */  
@@ -355,12 +399,6 @@ public class WordnikActivity extends Activity{
 		if(info==null || !info.isConnected()){  
 			return false;  
 		}  
-		if(info.isRoaming()){  
-			//here is the roaming option you can change it if you want to disable internet while roaming, just return false  
-			return true;  
-		}  
 		return true;  
-		
 	}  	
-	
 }

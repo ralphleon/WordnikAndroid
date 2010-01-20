@@ -2,8 +2,10 @@
     <item android:id="@+id/random"
           android:title="Random Word" 
           android:icon="@android:drawable/ic_menu_help"/>
-    <!-- <item android:id="@+id/list"
-          android:title="Recent" /> -->
+          
+    <item android:id="@+id/recent"
+    	  android:title="Recent"
+    	  android:icon="@android:drawable/ic_menu_agenda"/>      
           
     <item 	android:id="@+id/about"
     		android:title="About"

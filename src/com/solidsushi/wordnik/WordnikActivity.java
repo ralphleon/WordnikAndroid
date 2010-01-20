@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -47,6 +48,8 @@ public class WordnikActivity extends Activity{
 
 	private static final int DIALOG_ABOUT = 0;
 	
+	private static final int RECENT_ACTIVITY = 0;
+	
 	private TextView mDefinitionView;
 	private EditText mWordEdit;
 	private WordHandler mHandler;
@@ -61,6 +64,8 @@ public class WordnikActivity extends Activity{
 	private TextView mWodText;	
 	private TextView mErrText;
 
+	private RecentDbHelper mRecentHelper;
+	
 	
 	/** Called when the activity is first created. */
     @Override
@@ -69,7 +74,6 @@ public class WordnikActivity extends Activity{
         super.onCreate(savedInstanceState);
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);  	
-        setTheme(android.R.style.Theme_Light_NoTitleBar);
         setContentView(R.layout.main);
          
 		mWordEdit = (EditText)(findViewById(R.id.wordEdit));
@@ -94,6 +98,8 @@ public class WordnikActivity extends Activity{
         // Let's see if we're already loaded
         Object [] loaded = (Object[])getLastNonConfigurationInstance();
         loadState(loaded);
+        
+        mRecentHelper = new RecentDbHelper(this);
     }
     
     /**
@@ -142,6 +148,7 @@ public class WordnikActivity extends Activity{
         }
 		
 	}
+    
 
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -161,9 +168,22 @@ public class WordnikActivity extends Activity{
     	case R.id.about:
     		showDialog(DIALOG_ABOUT);
     		return true;
+    	case R.id.recent:
+    		startActivityForResult(new Intent(this,RecentActivity.class), RECENT_ACTIVITY);
+    		return true;
     	default:
     		return super.onContextItemSelected(item);
     	}
+    }
+    
+    @Override 
+    public void onActivityResult(int requestCode, int resultCode , Intent intent) 
+    {
+    	if(resultCode == RESULT_OK){		
+    		String word = intent.getStringExtra("word");
+    		mWordEdit.setText(word);
+    		loadWord();
+    	}	
     }
     
     @Override
@@ -207,12 +227,15 @@ public class WordnikActivity extends Activity{
     	return array;
     }
     
-    
+    /**
+     * Convienience keyboard hider 
+     */
     private void hideSoftKeyboard()
     {
     	InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mWordEdit.getWindowToken(), 0);	
     }
+    
     
     /**
      * Removes the old scrolled view and adds a new one
@@ -257,15 +280,19 @@ public class WordnikActivity extends Activity{
      */
     private void loadWord(){
     	
+    	hideSoftKeyboard();
+    	
     	String word = mWordEdit.getText().toString();		
     	
-		Thread thread;
-		mProgressScreen.setProgressText("Looking up " + word + "...");
+    	// Add this word to the database
+    	mRecentHelper.addWord(word);
+    	
+    	mProgressScreen.setProgressText("Looking up " + word + "...");
 		
 		setScrollView(mProgressScreen.getView());
 		mProgressScreen.reAnimate();
 		
-		thread = new Thread(new Loader(word));
+		Thread thread = new Thread(new Loader(word));
 	    thread.start();
     }
 	
@@ -274,6 +301,8 @@ public class WordnikActivity extends Activity{
      * Finds a random word
      */
 	private void loadRandomWord(){
+		
+		hideSoftKeyboard();
 		
 		setScrollView(mProgressScreen.getView());
 		mProgressScreen.setProgressText("Finding a random word...");			

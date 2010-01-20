@@ -20,16 +20,15 @@ class WordnikHelper{
 	
 	private static final String TAG = WordnikHelper.class.getSimpleName();
 	private static final String API_KEY = "7741b711eec09c12e05070046d60da6b92e03750359859fde";
+	private static final String URI = "http://api.wordnik.com/api-v2/word.json/";
 	
 	public static boolean wordExists(final String word)
 	{
 		boolean found = false;
-		String response = null;
 		
 		try {  
-               URL updateURL = new URL("http://api.wordnik.com/api/word.json/" + word);  
-               response = getResponse(updateURL); 
-		
+               URL updateURL = new URL(URI + word);  
+               String response = getResponse(updateURL); 
                return true;
                
 		} catch (Exception e) {  
@@ -44,19 +43,20 @@ class WordnikHelper{
 	{
 		String response = null;  
 		try {  
-               URL updateURL = new URL("http://api.wordnik.com/api/word.json/"+word+"/definitions");  
+               URL updateURL = new URL(URI+word+"/definitions");  
                response = getResponse(updateURL);
 		} catch (Exception e) {  
 			Log.v(TAG,"response:" + response );	
 			Log.e(TAG,"Error: " + e);
+			return "";
 		}  
 
 		String builder = "";
 		
-		
         // Turn the JSON into a structure   
-        try {       	
-        	JSONArray obj = new JSONArray(response);       	
+        try {       
+        	JSONObject definitions = new JSONObject(response);
+        	JSONArray obj = definitions.getJSONArray("definition");       	
         	
         	for(int i=0;i<obj.length();i++){	
         		JSONObject o = obj.getJSONObject(i);
@@ -76,18 +76,21 @@ class WordnikHelper{
 	{
 		String response = null;  
 		try {  
-               URL updateURL = new URL("http://api.wordnik.com/api/word.json/"+word+"/examples");  
+               URL updateURL = new URL(URI+word+"/examples");  
                response = getResponse(updateURL);
 		} catch (Exception e) {  
 			Log.v(TAG,"response:" + response );	
 			Log.e(TAG,"Error: " + e);
+			return "";
 		}  
 
 		String builder = "";
 		
         // Turn the JSON into a structure   
-        try {       	
-        	JSONArray obj = new JSONArray(response);       	
+        try {
+        	
+        	JSONObject examples = new JSONObject(response);
+        	JSONArray obj = examples.getJSONArray("example");      	
         	
         	for(int i=0;i<obj.length();i++){	
         		JSONObject o = obj.getJSONObject(i);
@@ -113,12 +116,14 @@ class WordnikHelper{
 	{
 		String response = null;  
 		try {  
-               URL updateURL = new URL("http://api.wordnik.com/api/words.json/randomWord?hasDictionaryDef=true");          
-               response = getResponse(updateURL);
-               
+			// Currently buggy with "?hasDictionaryDef=true"
+            URL updateURL = new URL("http://api.wordnik.com/api/words.json/randomWord");          
+            response = getResponse(updateURL);
+             
 		} catch (Exception e) {  
 			Log.v(TAG,"response:" + response );	
 			Log.e(TAG,"Error: " + e);
+			return "" ;
 		}  
 
 		String word = "";
@@ -144,6 +149,7 @@ class WordnikHelper{
 		} catch (Exception e) {  
 			Log.v(TAG,"response:" + response );	
 			Log.e(TAG,"Error: " + e);
+			return "";
 		}  
 
 		String r = "";

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 class RecentDbHelper
 {
-	private final int MAX = 50;
+	private final int MAX = 100;
 	
 	class Row extends Object {
 		public long _Id;
@@ -24,7 +24,8 @@ class RecentDbHelper
     	
     	mDb = ctx.openOrCreateDatabase(DATABASE_NAME, Context.MODE_PRIVATE, null);
         
-    	// Add a date column
+    	// TODO implement database version
+    	
     	final String CREATE_TABLE_RECENT =
         	"CREATE TABLE IF NOT EXISTS " + DATABASE_TABLE
         	+ "(_id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -35,12 +36,12 @@ class RecentDbHelper
 	
     public Cursor getRecentWords(){
 
-    	Cursor c = mDb.rawQuery("SELECT * FROM " + DATABASE_TABLE + " ORDER BY _id DESC", null);	
+    	Cursor c = mDb.rawQuery("SELECT * FROM " + DATABASE_TABLE + " ORDER BY _id DESC LIMIT " + MAX, null);	
     	return c;
     }
     
     public void addWord(String word){
-    	// limit the database size by MAX
+    	// TODO limit the database size by MAX
     	
     	ContentValues c = new ContentValues();
     	c.put("word",word);
@@ -49,7 +50,7 @@ class RecentDbHelper
     
     public void clearWords(){
     	// TODO Fix this
-    	final String clear = "TRUNCATE TABLE " + DATABASE_TABLE;
+    	final String clear = "DELETE FROM " + DATABASE_TABLE;
     	mDb.execSQL(clear);
     }
 }

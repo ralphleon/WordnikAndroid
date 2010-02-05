@@ -9,6 +9,7 @@
      Content provided by <a href="http://www.wordnik.com/">wordnik.com</a>. Developed by Ralph Gootee.
      Icon by Tael, from wikimedia.
     </string>
-	
-
+	<string name="usage">Statistics</string>	
+	<string name="definition">Definition</string>
+	<string name="examples">Examples</string>
 </resources>

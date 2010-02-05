@@ -16,8 +16,8 @@ import android.widget.TextView;
 public class RecentActivity extends Activity
 {
 	ListView mRecentList;
-	private String[] mWords;
 	private RecentDbHelper mDbHelper;
+	private Cursor mCursor;
 	
 	@Override 
 	public void onCreate(Bundle icicle)
@@ -30,14 +30,14 @@ public class RecentActivity extends Activity
 		
 		mDbHelper = new RecentDbHelper(this);
 		
-		Cursor c = mDbHelper.getRecentWords();
-		startManagingCursor(c);
+		mCursor = mDbHelper.getRecentWords();
+		startManagingCursor(mCursor);
 		
 		String [] from = new String[] {"word"};
 		int [] to = new int[] {R.id.text1};
 
 		mRecentList.setAdapter(new SimpleCursorAdapter(this, 
-				R.layout.recent_row, c, from, to));
+				R.layout.recent_row, mCursor, from, to));
  		
 		mRecentList.setOnItemClickListener(new ListListener());
 		
@@ -57,6 +57,7 @@ public class RecentActivity extends Activity
     	switch (item.getItemId()) {
     	case R.id.clearMenu:
     		mDbHelper.clearWords();
+    		mCursor.requery();
     		
     		return true;
     	default:

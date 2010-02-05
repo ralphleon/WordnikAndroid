@@ -111,6 +111,44 @@ class WordnikHelper{
 		
 		return builder;
 	}
+	
+	public static String buildFrequency( final String word)
+	{
+		String response = null;  
+		try {  
+               URL updateURL = new URL(URI+word+"/frequency");  
+               response = getResponse(updateURL);
+		} catch (Exception e) {  
+			Log.v(TAG,"response:" + response );	
+			Log.e(TAG,"Error: " + e);
+			return "";
+		}  
+
+		String builder = "";
+		
+        // Turn the JSON into a structure   
+        try {
+        	
+        	JSONObject examples = new JSONObject(response);
+        	JSONArray obj = examples.getJSONArray("frequency");      	
+        	
+        	for(int i=0;i<obj.length();i++){	
+        		JSONObject o = obj.getJSONObject(i);
+        		
+        		String count = o.optString("count");
+        		String year = o.optString("year");
+        		
+        		
+        		builder += "<p>" + (i+1) + ". " + year + " - <i>" + count + "</i></p>";
+        	
+        	}
+		} catch (Exception e) {
+
+			Log.e(TAG,"Error" + e);
+		}
+		
+		return builder;
+	}
 
 	public static String buildRandomWord()
 	{

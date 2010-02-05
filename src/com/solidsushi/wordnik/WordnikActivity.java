@@ -36,6 +36,7 @@ public class WordnikActivity extends Activity{
 		String word;
 		Spanned definitions;
 		Spanned examples;
+		Spanned frequency;
 	}
 	
 	private static final String TAG = WordnikActivity.class.getSimpleName();
@@ -65,6 +66,8 @@ public class WordnikActivity extends Activity{
 	private TextView mErrText;
 
 	private RecentDbHelper mRecentHelper;
+
+	private TextView mFrequencyView;
 	
 	
 	/** Called when the activity is first created. */
@@ -92,6 +95,7 @@ public class WordnikActivity extends Activity{
         
         mDefinitionView = (TextView)mFeedScreen.findViewById(R.id.defView);
 		mExampleView = (TextView)mFeedScreen.findViewById(R.id.exampleView);
+		mFrequencyView = (TextView)mFeedScreen.findViewById(R.id.usageText);
 		  
         mHandler = new WordHandler(); 
         
@@ -420,8 +424,11 @@ public class WordnikActivity extends Activity{
 					
 				string = WordnikHelper.buildExample(word);
 				b.putString("example", string);	
+				
+				string = WordnikHelper.buildFrequency(word);
+				b.putString("frequency", string);	
+				
 				msg.arg1 = AOK;	
-			
 			}else{
 				msg.arg1 = ERR;
 				msg.arg2 = NOT_FOUND;
@@ -451,6 +458,7 @@ public class WordnikActivity extends Activity{
     			
     			data.definitions = Html.fromHtml(b.getString("def"));
     			data.examples =  Html.fromHtml(b.getString("example"));
+    			data.frequency = Html.fromHtml(b.getString("frequency"));
     			
     			loadWordData(data);			
     			break;
@@ -489,6 +497,10 @@ public class WordnikActivity extends Activity{
 		mExampleView.setText(
 				data.examples,
 				TextView.BufferType.SPANNABLE);
+		
+		mFrequencyView.setText(
+				data.frequency,
+				TextView.BufferType.SPANNABLE);
 	}
 	
 	
@@ -499,6 +511,7 @@ public class WordnikActivity extends Activity{
 		data.word = mWordEdit.getText().toString();
 		data.definitions=  (Spannable) mDefinitionView.getText();
 		data.examples= (Spannable) mExampleView.getText();
+		data.frequency = (Spannable) mFrequencyView.getText();
 		
 		return data;
 	}

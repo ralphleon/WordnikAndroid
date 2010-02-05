@@ -14,11 +14,11 @@
 	android:layout_height="wrap_content"
 	android:background="@drawable/settings_header_raw"
 	android:textColor="#fff"
-	android:text="Definition"
+	android:text="@string/definition"
 	android:padding="5dp"
 	android:paddingLeft="5dp"
 />
-	    
+	     
 <TextView  
 	android:id="@+id/defView"
     android:layout_width="fill_parent" 
@@ -33,7 +33,7 @@
 	android:layout_height="wrap_content"
 	android:background="@drawable/settings_header_raw"
 	android:textColor="#fff"
-	android:text="Examples"
+	android:text="@string/examples"
 	android:padding="5dp"
 	android:paddingLeft="5dp"
 />
@@ -45,6 +45,27 @@
     android:padding="10dp"
     android:bufferType="spannable"
     android:paddingBottom="0px"
+    />
+      
+<TextView
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/settings_header_raw"
+	android:textColor="#fff"
+	android:text="@string/usage"
+	android:padding="5dp"
+	android:paddingLeft="5dp"
+	android:visibility="gone"
+/>
+
+<TextView  
+	android:id="@+id/usageText"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:padding="10dp"
+    android:bufferType="spannable"
+    android:paddingBottom="0px"
+	android:visibility="gone"
     />
       
 </LinearLayout>

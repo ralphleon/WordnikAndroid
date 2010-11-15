@@ -13,6 +13,7 @@ import android.os.Message;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -64,7 +65,8 @@ public class WordnikActivity extends Activity{
 	
 	private TextView mWodText;	
 	private TextView mErrText;
-
+	private String mWod = "";
+	
 	private RecentDbHelper mRecentHelper;
 
 	private TextView mFrequencyView;
@@ -265,15 +267,13 @@ public class WordnikActivity extends Activity{
 			
 			case R.id.goButton:		
 				loadWord();				
-				break;
-				
+				break;				
 			case R.id.random:
 				loadRandomWord();
+				break;		
+			case R.id.wod:
+				mWordEdit.setText(mWod);
 				break;
-				
-			case R.id.wodText:
-				mWordEdit.setText("word of the day!");
-				break;				
 			}
 		}
 	}
@@ -286,7 +286,11 @@ public class WordnikActivity extends Activity{
     	
     	hideSoftKeyboard();
     	
-    	String word = mWordEdit.getText().toString();		
+    	String word = mWordEdit.getText().toString();
+    	
+    	// Lowercase and strip
+    	word = word.toLowerCase();
+    	word = word.trim();
     	
     	// Add this word to the database
     	mRecentHelper.addWord(word);
@@ -364,10 +368,17 @@ public class WordnikActivity extends Activity{
 			msg.setData(b);
 			msg.arg1 = WOD;
 
-			String word = WordnikHelper.buildWordOfTheDay();
-	
+			String [] word = WordnikHelper.buildWordOfTheDay();
+			String wodWord = "", wod = "";
+			
+			if(word != null){
+				wodWord = word[0];
+				wod = word[1];
+			}
+			
 			// Send our word back to the progress dialog
-			b.putString("wod",word);
+			b.putString("wodWord",wodWord);
+			b.putString("wod",wod);
 			mHandler.sendMessage(msg);
 		}
 		
@@ -420,15 +431,22 @@ public class WordnikActivity extends Activity{
 				String string = "";
 				
 				string = WordnikHelper.buildDefinition(word);
-				b.putString("def", string);
+				
+				// This shouldn't be needed
+				if(string == ""){
+					msg.arg1 = ERR;
+					msg.arg2 = NOT_FOUND;					
+				}else{
+				
+					b.putString("def", string);
 					
-				string = WordnikHelper.buildExample(word);
-				b.putString("example", string);	
+					string = WordnikHelper.buildExample(word);
+					b.putString("example", string);	
 				
-				string = WordnikHelper.buildFrequency(word);
-				b.putString("frequency", string);	
-				
-				msg.arg1 = AOK;	
+					string = WordnikHelper.buildFrequency(word);
+					b.putString("frequency", string);	
+					msg.arg1 = AOK;	
+				}
 			}else{
 				msg.arg1 = ERR;
 				msg.arg2 = NOT_FOUND;
@@ -443,7 +461,8 @@ public class WordnikActivity extends Activity{
 	 */
 	private class WordHandler extends Handler
 	{		
-    	@Override
+
+		@Override
 		public void handleMessage(Message msg)
     	{	
     		Bundle b = msg.getData();
@@ -454,25 +473,22 @@ public class WordnikActivity extends Activity{
     		case AOK:  
      			setScrollView(mFeedScreen);
      			
-    			WordData data = new WordData();
-    			
+    			WordData data = new WordData();			
     			data.definitions = Html.fromHtml(b.getString("def"));
     			data.examples =  Html.fromHtml(b.getString("example"));
     			data.frequency = Html.fromHtml(b.getString("frequency"));
     			
     			loadWordData(data);			
-    			break;
-    		
+    			break;    		
     		case ERR:  			
     			loadErrorScreen(msg.arg2);
-    			break;
-    				
+    			break;   				
     		case RANDOM:
     			mWordEdit.setText(b.getString("word"));
     			loadWord();
     			break;
-
     		case WOD:
+    			mWod = b.getString("wodWord");
     			String wod = b.getString("wod");
     			mWodText.setText(Html.fromHtml(wod));
     			break;

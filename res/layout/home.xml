@@ -31,6 +31,7 @@
 	 
 	<LinearLayout
 	android:orientation="vertical"
+	android:id="@+id/wod"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"	
 	android:layout_marginLeft="10dp"
@@ -39,11 +40,11 @@
 	android:layout_alignParentBottom="true"
 	android:padding="10dp"
 	android:background="@drawable/wod_background"
+	android:onClick="onClick"
 	>
 	
 	<TextView
 	android:id="@+id/wodText"
-	android:onClick="onClick"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:text="@string/intro"

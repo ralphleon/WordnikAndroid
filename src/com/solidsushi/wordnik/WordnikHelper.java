@@ -39,12 +39,12 @@ class WordnikHelper{
 		return found;
 	}
 	
-	public static String buildDefinition( final String word)
+	public static String buildDefinition(final String word)
 	{
 		String response = null;  
 		try {  
-               URL updateURL = new URL(URI+word+"/definitions");  
-               response = getResponse(updateURL);
+			URL updateURL = new URL(URI+word+"/definitions");  
+			response = getResponse(updateURL);
 		} catch (Exception e) {  
 			Log.v(TAG,"response:" + response );	
 			Log.e(TAG,"Error: " + e);
@@ -55,14 +55,16 @@ class WordnikHelper{
 		
         // Turn the JSON into a structure   
         try {       
-        	JSONObject definitions = new JSONObject(response);
-        	JSONArray obj = definitions.getJSONArray("definition");       	
+
+        	Log.v(TAG,response);
+        	JSONArray obj = new JSONArray(response);
         	
         	for(int i=0;i<obj.length();i++){	
         		JSONObject o = obj.getJSONObject(i);
         		
         		String pos = o.optString("partOfSpeech");
-        		builder += "<p>" + (i+1) + ". <b>" + pos + "</b> " + o.getString("defTxtSummary") + "</p>";
+        		String text = o.optString("text");
+        		builder += "<p>" + (i+1) + ". <b>" + pos + "</b> " + text + "</p>";
         	}
 		} catch (Exception e) {
 
@@ -88,9 +90,7 @@ class WordnikHelper{
 		
         // Turn the JSON into a structure   
         try {
-        	
-        	JSONObject examples = new JSONObject(response);
-        	JSONArray obj = examples.getJSONArray("example");      	
+        	JSONArray obj = new JSONArray(response);      	
         	
         	for(int i=0;i<obj.length();i++){	
         		JSONObject o = obj.getJSONObject(i);
@@ -169,7 +169,7 @@ class WordnikHelper{
         // Turn the JSON into a structure   
         try {       	
         	JSONObject obj = new JSONObject(response);       	
-        	word = obj.getString("word");	
+        	word = obj.getString("wordstring");	
 		} catch (Exception e) {
 			Log.e(TAG,"Error" + e);
 		}
@@ -177,7 +177,7 @@ class WordnikHelper{
 		return word;
 	}
 
-	public static String buildWordOfTheDay()
+	public static String [] buildWordOfTheDay()
 	{
 		String response = null;  
 		try {  
@@ -187,16 +187,16 @@ class WordnikHelper{
 		} catch (Exception e) {  
 			Log.v(TAG,"response:" + response );	
 			Log.e(TAG,"Error: " + e);
-			return "";
+			return null;
 		}  
 
-		String r = "";
+		String r = "",word="";
 		
         // Turn the JSON into a structure   
         try {      
         	
         	JSONObject obj = new JSONObject(response);       	
-        	String word = obj.getString("word");
+        	word = obj.getString("wordstring");
         	
         	// word of the day seems to currently be list
         	String def = obj.getString("definition");
@@ -212,8 +212,8 @@ class WordnikHelper{
 		} catch (Exception e) {
 			Log.e(TAG,"Error" + e);
 		}
-		
-		return r;
+		String [] set = {word,r};
+		return set;
 	}
 	
 	private static String getResponse(URL updateURL) throws IOException  {

@@ -20,7 +20,7 @@ class WordnikHelper{
 	
 	private static final String TAG = WordnikHelper.class.getSimpleName();
 	private static final String API_KEY = "7741b711eec09c12e05070046d60da6b92e03750359859fde";
-	private static final String URI = "http://api.wordnik.com/api-v2/word.json/";
+	private static final String URI = "http://api.wordnik.com/api/word.json/";
 	
 	public static boolean wordExists(final String word)
 	{
